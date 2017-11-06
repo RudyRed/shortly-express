@@ -17,17 +17,17 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/', 
+app.get('/',
 (req, res) => {
   res.render('index');
 });
 
-app.get('/create', 
+app.get('/create',
 (req, res) => {
   res.render('index');
 });
 
-app.get('/links', 
+app.get('/links',
 (req, res, next) => {
   models.Links.getAll()
     .then(links => {
@@ -38,7 +38,7 @@ app.get('/links',
     });
 });
 
-app.post('/links', 
+app.post('/links',
 (req, res, next) => {
   var url = req.body.url;
   if (!models.Links.isValidUrl(url)) {
@@ -77,7 +77,36 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/signup', (err, res) => {
+  res.render('signup');
+});
 
+app.post('/signup', (req, res, next) => {
+  // console.log(typeof req.body, '----------------------------');
+  // //console.log(models.Users.get({username: req.body.username}),'nfdkljghsdlkjfghlsjkdfgh');
+  // if (models.Users.get({username: req.body.username}) !== '[]') {
+  //   console.log('ER_DUP_ENTRY');
+  //   res.end();
+  // } else {
+    models.Users.getAll({'username': req.body.username})
+    .then(function(data){
+      console.log(data, '----------------------')
+      if (data.length === 0) {
+        console.log('hello');
+        models.Users.create(req.body);
+        next();
+      } else {
+        res.render('signup');
+      }
+      //success, user is not defined we can create their profile
+      //else return error the user already exists
+    }).catch( (err) => {
+      console.log(err);
+    });
+  // }
+
+
+});
 
 
 /************************************************************/
