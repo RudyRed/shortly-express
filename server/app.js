@@ -109,10 +109,6 @@ app.post('/login', (req, res) => {
   //console.log(req, '***************************************')
   models.Users.getAll({'username': req.body.username})
   .then( (data) => {
-    // var obj = JSON.parse(JSON.stringify(data));
-    // console.log(obj, 'SAAAAAALT')
-    //console.log('This is the req body password-----------', req.body.password);
-    //console.log('This is the data password ++++++++++++++++++++++', data.password);
     if (!data.length) {
       res.redirect('/login');
     } else {
