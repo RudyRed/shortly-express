@@ -2,19 +2,21 @@ const models = require('../models');
 const Promise = require('bluebird');
 
 module.exports.createSession = (req, res, next) => {
+  if (req.headers.cookies){
 
-    req.session = models.Sessions.create({hash:'fcaecawefw'})
-
-
-
-    // .then(() => {
-    //   console.log(typeof session);
-    //   // req.session = session;
-    //   console.log(req.session, '=645=645=645=')
-    // })
-    // .catch( (err) =>{
-    //   console.log(err);
-    // });
+  } else {
+    models.Sessions.create()
+    .then( (session) => {
+      return models.Sessions.get({id: session.insertId})
+    })
+    .then((session) => {
+      req.session = session;
+      next();
+    })
+    .catch( (err) =>{
+      console.log(err);
+    });
+  }
 };
 
 /************************************************************/
