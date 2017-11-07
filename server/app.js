@@ -5,7 +5,7 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
-
+const CookieParser = require('./middleware/cookieParser');
 const app = express();
 
 app.set('views', `${__dirname}/views`);
@@ -17,9 +17,11 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/',
-(req, res) => {
-  res.render('index');
+app.get('/', (req, res) => {
+
+  Auth.createSession(req, res, function () {
+    res.render('index');
+  });
 });
 
 app.get('/create',
@@ -102,18 +104,22 @@ app.post('/signup', (req, res, next) => {
 
 
 app.get('/login', (err, res) => {
+
   res.render('login');
 });
 
 app.post('/login', (req, res) => {
-  //console.log(req, '***************************************')
   models.Users.getAll({'username': req.body.username})
   .then( (data) => {
     if (!data.length) {
       res.redirect('/login');
     } else {
       if (utils.compareHash(req.body.password, data[0].password, data[0].salt)) {
-        res.redirect('/');
+        CookieParser(req, res, () => {
+          Auth.createSession(req, res, function () {
+            res.redirect('/');
+          })
+        });
       } else {
         res.redirect('/login');
       }

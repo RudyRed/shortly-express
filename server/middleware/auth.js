@@ -4,7 +4,7 @@ const Promise = require('bluebird');
 module.exports.createSession = (req, res, next) => {
   var session = models.Sessions;
 
-  if (req.headers.cookie === undefined && JSON.stringify(req.cookies) === '{}') {
+  if (req.headers.cookie === undefined && JSON.stringify(req.cookies) === '{}' || !req.cookies) {
     session.create()
       .then((data) => {
         return session.get({id: data.insertId})})
@@ -14,11 +14,13 @@ module.exports.createSession = (req, res, next) => {
         }
         res.cookie('shortlyid', data.hash);
         next();
+      })
+      .catch(err => {
+        console.log(err,'you done messed up')
       });
   } else {
     models.Sessions.get({hash: req.cookies.shortlyid})
     .then((data) => {
-      console.log(data, 'rewvrhbfhjervfuervfeuhrgve')
       if (!data || !data.userId) {
         session.create()
           .then((data) => {
@@ -32,15 +34,16 @@ module.exports.createSession = (req, res, next) => {
           });
       } else {
         var currentId = data.id;
-        console.log(data, '4398509u208tu045')
         req.session = data
         res.cookie('shortlyid', data.hash);
         next();
       }
     })
+    .catch(err => {
+      console.log(err,'you done messed up')
+    })
   }
 };
-
 
 //             UPDATE AN EXPIRED COOKIE I GUESS
 // session.update({id: data.id}, {hash: 'hello my sql we got in a table'} )

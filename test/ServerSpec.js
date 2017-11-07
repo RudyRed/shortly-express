@@ -61,7 +61,7 @@ describe('', function() {
     afterEach(function() { server.close(); });
   });
 
-  xdescribe('Database Schema:', function() {
+  describe('Database Schema:', function() {
     it('contains a users table', function(done) {
       var queryString = 'SELECT * FROM users';
       db.query(queryString, function(err, results) {
@@ -123,7 +123,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('signup creates a new user record', function(done) {
       var options = {
@@ -208,7 +208,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     beforeEach(function(done) {
       var options = {
@@ -277,7 +277,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Sessions Schema:', function() {
+  describe('Sessions Schema:', function() {
     it('contains a sessions table', function(done) {
       var queryString = 'SELECT * FROM sessions';
       db.query(queryString, function(err, results) {
@@ -505,6 +505,7 @@ describe('', function() {
     });
 
     it('saves a new session when the server receives a request', function(done) {
+      console.log('Current Test +++++++++++++++++++++++==')
       requestWithSession('http://127.0.0.1:4568/', function(err, res, body) {
         if (err) { return done(err); }
         var queryString = 'SELECT * FROM sessions';
@@ -521,6 +522,7 @@ describe('', function() {
       requestWithSession('http://127.0.0.1:4568/', function(error, res, body) {
         if (error) { return done(error); }
         var cookies = cookieJar.getCookies('http://127.0.0.1:4568/');
+        console.log('COOKIE JAR TIME', cookies)
         expect(cookies.length).to.equal(1);
         done();
       });
