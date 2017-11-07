@@ -82,32 +82,55 @@ app.get('/signup', (err, res) => {
 });
 
 app.post('/signup', (req, res, next) => {
-  // console.log(typeof req.body, '----------------------------');
-  // //console.log(models.Users.get({username: req.body.username}),'nfdkljghsdlkjfghlsjkdfgh');
-  // if (models.Users.get({username: req.body.username}) !== '[]') {
-  //   console.log('ER_DUP_ENTRY');
-  //   res.end();
-  // } else {
     models.Users.getAll({'username': req.body.username})
-    .then(function(data){
-      console.log(data, '----------------------')
+    .then( (data) => {
       if (data.length === 0) {
-        console.log('hello');
         models.Users.create(req.body);
-        next();
+        res.redirect('/')
+        // next();
       } else {
-        res.render('signup');
+        res.redirect('/signup');
       }
       //success, user is not defined we can create their profile
       //else return error the user already exists
-    }).catch( (err) => {
-      console.log(err);
+    })//.then()
+    .catch( (err) => {
+      console.log(err.message);
+      console.log(err.stack)
     });
-  // }
-
-
 });
 
+
+app.get('/login', (err, res) => {
+  res.render('login');
+});
+
+app.post('/login', (req, res) => {
+  //console.log(req, '***************************************')
+  models.Users.getAll({'username': req.body.username})
+  .then( (data) => {
+    // var obj = JSON.parse(JSON.stringify(data));
+    // console.log(obj, 'SAAAAAALT')
+    //console.log('This is the req body password-----------', req.body.password);
+    //console.log('This is the data password ++++++++++++++++++++++', data.password);
+    if (!data.length) {
+      res.redirect('/login');
+    } else {
+      if (utils.compareHash(req.body.password, data[0].password, data[0].salt)) {
+        res.redirect('/');
+      } else {
+        res.redirect('/login');
+      }
+    }
+  })
+  .catch( (err) => {
+    console.log(err.message);
+    console.log(err.stack)
+  });
+});
+
+
+// select all of that username
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
