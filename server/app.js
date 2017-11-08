@@ -14,14 +14,16 @@ app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
-
+app.use(CookieParser);
+app.use(Auth.createSession);
 
 
 app.get('/', (req, res) => {
-
-  Auth.createSession(req, res, function () {
+  //       CookieParser(req, res, () => {
+  // Auth.createSession(req, res, function () {
     res.render('index');
-  });
+//   });
+// })
 });
 
 app.get('/create',
@@ -87,24 +89,25 @@ app.post('/signup', (req, res, next) => {
     models.Users.getAll({'username': req.body.username})
     .then( (data) => {
       if (data.length === 0) {
-        models.Users.create(req.body);
-        res.redirect('/')
-        // next();
+        models.Users.create(req.body)
+        .then((data) => {
+          models.Sessions.update({hash: req.session.hash}, {userId: data.insertId});
+        })
+        .then( () => {
+          res.redirect('/');
+        });
       } else {
         res.redirect('/signup');
       }
-      //success, user is not defined we can create their profile
-      //else return error the user already exists
-    })//.then()
+    })
     .catch( (err) => {
       console.log(err.message);
-      console.log(err.stack)
+      console.log(err.stack);
     });
 });
 
 
 app.get('/login', (err, res) => {
-
   res.render('login');
 });
 
@@ -115,11 +118,9 @@ app.post('/login', (req, res) => {
       res.redirect('/login');
     } else {
       if (utils.compareHash(req.body.password, data[0].password, data[0].salt)) {
-        CookieParser(req, res, () => {
-          Auth.createSession(req, res, function () {
-            res.redirect('/');
-          })
-        });
+
+
+        res.redirect('/');
       } else {
         res.redirect('/login');
       }
@@ -127,12 +128,12 @@ app.post('/login', (req, res) => {
   })
   .catch( (err) => {
     console.log(err.message);
-    console.log(err.stack)
+    console.log(err.stack);
   });
 });
-
-
-// select all of that username
+// app.get('./logout', (req, res, next)) => {
+//   return models.Sessions.delete({hash: req.session.})
+// });
 
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail

@@ -505,7 +505,6 @@ describe('', function() {
     });
 
     it('saves a new session when the server receives a request', function(done) {
-      console.log('Current Test +++++++++++++++++++++++==')
       requestWithSession('http://127.0.0.1:4568/', function(err, res, body) {
         if (err) { return done(err); }
         var queryString = 'SELECT * FROM sessions';
@@ -522,7 +521,6 @@ describe('', function() {
       requestWithSession('http://127.0.0.1:4568/', function(error, res, body) {
         if (error) { return done(error); }
         var cookies = cookieJar.getCookies('http://127.0.0.1:4568/');
-        console.log('COOKIE JAR TIME', cookies)
         expect(cookies.length).to.equal(1);
         done();
       });
@@ -533,7 +531,6 @@ describe('', function() {
         if (err) { return done(err); }
         var cookies = cookieJar.getCookies('http://127.0.0.1:4568/');
         var cookieValue = cookies[0].value;
-
         var queryString = `
           SELECT users.username FROM users, sessions
           WHERE sessions.hash = ? AND users.id = sessions.userId

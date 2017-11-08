@@ -4,6 +4,7 @@ const Promise = require('bluebird');
 module.exports.createSession = (req, res, next) => {
   var session = models.Sessions;
 
+  // if no cookie
   if (req.headers.cookie === undefined && JSON.stringify(req.cookies) === '{}' || !req.cookies) {
     session.create()
       .then((data) => {
@@ -14,14 +15,13 @@ module.exports.createSession = (req, res, next) => {
         }
         res.cookie('shortlyid', data.hash);
         next();
-      })
-      .catch(err => {
-        console.log(err,'you done messed up')
       });
   } else {
+    // look up session using cookie hash
     models.Sessions.get({hash: req.cookies.shortlyid})
     .then((data) => {
       if (!data || !data.userId) {
+        // if no session with that hash, make new session
         session.create()
           .then((data) => {
             return session.get({id: data.insertId})})
@@ -33,6 +33,7 @@ module.exports.createSession = (req, res, next) => {
             next();
           });
       } else {
+        // if sessoion already exists, just add session to request
         var currentId = data.id;
         req.session = data
         res.cookie('shortlyid', data.hash);
@@ -40,31 +41,11 @@ module.exports.createSession = (req, res, next) => {
       }
     })
     .catch(err => {
-      console.log(err,'you done messed up')
+      console.log(err,'you done messed up');
+      next();
     })
   }
 };
-
-//             UPDATE AN EXPIRED COOKIE I GUESS
-// session.update({id: data.id}, {hash: 'hello my sql we got in a table'} )
-//   .then((data) => {
-//       return session.get({id: currentId})
-//   })
-//   .then((data) => {
-//       req.session = {
-//         hash: data.hash
-//     }
-//     res.cookie('shortlyid', data.hash);
-//     next();
-  // });
-
-
-
-
-
-
-
-
 
 /************************************************************/
 // Add additional authentication middleware functions below
